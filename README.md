@@ -1,1 +1,2 @@
-# android
+Revisiting android dev after more than a decade, now with exciting Kotlin. 
+This repo contains many android examples as and when I learn and explore more  and more about Android dev...
