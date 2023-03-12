@@ -13,28 +13,38 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import java.util.Calendar;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
     TextView alarmTime;
     Button selectAlarmButton;
+    TextView normalizeTime;
     TimePickerDialog timePickerDialog;
-
     public AudioManager myAudioManager;
-
     final static int RQS_1 = 1;
+    // pick the user selected silent duration, default 30
+    EditText silentDuration;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        alarmTime = findViewById(R.id.alarmTime);
+        silentDuration = findViewById(R.id.duration);
+
+        alarmTime = findViewById(R.id.silentMode);
         selectAlarmButton = findViewById(R.id.selectTimeButton);
+
+        normalizeTime = findViewById(R.id.normalMode);
+
 
         // for automatically setting phone to silent modes etc
         myAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
@@ -74,25 +84,45 @@ public class MainActivity extends AppCompatActivity {
             targetcal.set(Calendar.SECOND, 0);
             targetcal.set(Calendar.MILLISECOND, 0);
 
-            if (targetcal.compareTo(calNow ) <= 0) {
+            if (targetcal.compareTo(calNow) <= 0) {
                 targetcal.add(Calendar.DATE, 1);
             }
             setAlarm(targetcal);
         }
     };
 
-    public void setAlarm (Calendar targetCal) {
-        alarmTime.setText("Alarm time set for:" +targetCal.getTime());
+    public void setAlarm(Calendar targetCal) {
+        alarmTime.setText("AutoSilenced at:" + targetCal.getTime());
 
-        Intent  intent = new  Intent(getBaseContext(), AlarmReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                getBaseContext(), RQS_1, intent, 0);
+        Intent intentS = new Intent(getBaseContext(), AlarmReceiver.class);
+        intentS.putExtra("modeIDS", 1);
+        PendingIntent pendingIntentS = PendingIntent.getBroadcast(
+                getBaseContext(), RQS_1, intentS, PendingIntent.FLAG_IMMUTABLE);
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, targetCal.getTimeInMillis(),
-                pendingIntent);
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, targetCal.getTimeInMillis(),
+                pendingIntentS);
+
+        // - - - - - - - - - - -
+        // Add another PendingIntent for  switching to Normal mode after 'silentDuration'
+
+        Intent intentN = new Intent(getBaseContext(), AlarmReceiver.class);
+        intentN.putExtra("modeIDN", 2);
+        String text = silentDuration.getText().toString();
+        // default duration
+        int durationInMin = 2;
+        if (!silentDuration.getText().toString().isEmpty()) {
+            durationInMin = Integer.parseInt(text);
+        }
+        ;
+        PendingIntent pendingIntentN = PendingIntent.getBroadcast(
+                getBaseContext(), RQS_1, intentN, PendingIntent.FLAG_UPDATE_CURRENT);
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
+                targetCal.getTimeInMillis() + (durationInMin * 60 * 1000),
+                pendingIntentN);
+//        Toast.makeText(getBaseContext(), "Will switch back to normal mode at "
+//                        + new Date(targetCal.getTimeInMillis() + (durationInMin * 60 * 1000)),
+//                Toast.LENGTH_LONG).show();
+        normalizeTime.setText("Normalized at: " + new Date(targetCal.getTimeInMillis() + (durationInMin * 60 * 1000)));
     }
 
-//    public void silent(View v) {
-//        myAudioManager.setRingerMode(AudioManager.RINGER_MODE_SILENT);
-//    }
 }

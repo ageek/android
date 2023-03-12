@@ -4,21 +4,46 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding = "20dp"
     android:orientation="vertical"
+    android:padding="20dp"
     tools:context=".MainActivity">
 
     <Button
         android:id="@+id/selectTimeButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Select Time"
-        android:onClick="selectTime"/>
+        android:onClick="selectTime"
+        android:text="Select Time" />
 
     <TextView
-        android:id="@+id/alarmTime"
+        android:id="@+id/silentMode"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Selected time: " />
+        android:text="AutoSilent @: " />
+
+    <TextView
+        android:id="@+id/normalMode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ringer @: " />
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/silentTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Silent Duration:" />
+
+        <EditText
+            android:id="@+id/duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="number" />
+    </LinearLayout>
 
 </LinearLayout>
